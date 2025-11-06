@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\Dwh\Dimensions\" />
+    <Folder Include="Entities\Dwh\Facts\" />
+  </ItemGroup>
+
 </Project>

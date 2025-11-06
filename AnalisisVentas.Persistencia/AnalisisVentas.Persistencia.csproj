@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="BDContext\" />
+    <Folder Include="Repositories\Dwh\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnalisisVentas.Application\AnalisisVentas.Application.csproj" />
+    <ProjectReference Include="..\AnalisisVentas.Domian\AnalisisVentas.Domian.csproj" />
+  </ItemGroup>
+
 </Project>
