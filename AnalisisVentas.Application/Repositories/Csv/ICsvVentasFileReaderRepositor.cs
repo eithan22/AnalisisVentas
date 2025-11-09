@@ -6,12 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalisisVentas.Application.Repositories
+namespace AnalisisVentas.Application.Repositories.Csv
 {
-    public interface ICsvVentasFileReaderRepository : IFileReaderRepository<VentasHistoricaRepository>
+    public interface ICsvClienteRepository : IFileReaderRepository<Customer>
     {
-
-
-      
+       
     }
+
+
 }
+
+
+

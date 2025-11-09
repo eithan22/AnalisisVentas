@@ -1,4 +1,5 @@
 ﻿using AnalisisVentas.Domian.Entities.Api;
+using AnalisisVentas.Domian.Entities.Api.AnalisisVentas.Domain.Entities.Api;
 using AnalisisVentas.Domian.Entities.Cvs;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,8 @@ namespace AnalisisVentas.Application.Repositories.IApiRepository
 {
     public interface IProductApiRepositoriy
     {
-        Task<IEnumerable<ProductActualizados>> GetProductsAsync();
+        Task<IEnumerable<ProductActualizados>> GetProductActualizados();
+
+
     }
 }

@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace AnalisisVentas.Application.Interfaces
 {
-    public interface IVentasHandlerServices
+    public interface IVentasServices
     {
-        Task <ServiceResult>ProcessVentasDataAsync();
+        Task<ServiceResult> ProcesarVentasAsync(string filePath);
+
     }
 }

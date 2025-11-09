@@ -1,5 +1,6 @@
 ﻿
 using AnalisisVentas.Domian.Entities.DB;
+using AnalisisVentas.Domian.Entities.DB.AnalisisVentas.Domain.Entities.DB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace AnalisisVentas.Application.Repositories.BD
 {
     public interface IVentasHistoricaRepository
     {
-        Task<IEnumerable<VentasHistoricas>> GetVentasHistoricasDatasAsync();
+        Task<IEnumerable<VentasHistorica>> GetVentasHistoricas();
 
     }
 }
