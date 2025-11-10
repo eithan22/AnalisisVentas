@@ -1,6 +1,6 @@
 ﻿
 using AnalisisVentas.Application.Repositories;
-using AnalisisVentas.Domian.Entities.Api.AnalisisVentas.Domain.Entities.Api;
+using AnalisisVentas.Domian.Entities.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json; 
@@ -28,7 +28,7 @@ namespace AnalisisVentas.Persistencia.Repositories.Api
        
         public async Task<IEnumerable<ClientesActualizados>> GetClientesActualizadosAsync()
         {
-            _logger.LogInformation("Iniciando extracción de API para Clientes desde {Endpoint}...", _endpoint);
+            _logger.LogInformation("Iniciando extraccion de API para Clientes desde {Endpoint}..", _endpoint);
             var clientes = new List<ClientesActualizados>();
 
             try

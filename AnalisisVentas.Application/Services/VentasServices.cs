@@ -13,27 +13,19 @@ namespace AnalisisVentas.Application.Services
     
     public class VentasServices : IVentasServices
     {
-        // 1. Inyecta TODAS las herramientas
+        
         private readonly IConfiguration _configuration;
         private readonly ILogger<VentasServices> _logger;
 
-        // Fuentes de API
         private readonly IClienteApiRepository _apiClienteRepo;
         private readonly IProductApiRepositoriy _apiProductoRepo;
-
-        // Fuente de Base de Datos
+      
         private readonly IVentasHistoricaRepository _dbVentaRepo;
-
-
-        // Fuentes de CSV (¡El patrón de tu amigo!)
         private readonly IFileReaderRepository<Customer> _csvClienteRepo;
         private readonly IFileReaderRepository<Product> _csvProductoRepo;
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
         private readonly IFileReaderRepository<OrderDetail> _csvOrderDetailRepo; 
 
-
-
-        // 2. EL CONSTRUCTOR
         public VentasServices(
             ILogger<VentasServices> logger,
             IConfiguration configuration,
@@ -62,9 +54,7 @@ namespace AnalisisVentas.Application.Services
             _logger.LogInformation("===== INICIANDO FASE DE EXTRACCIÓN (TODAS LAS FUENTES) =====");
             try
             {
-                // --- EXTRACCIÓN (E) ---
-
-                // 1. Leer la ruta base de los CSV
+              
                 string basePath = _configuration["CsvSources:BasePath"];
                 if (string.IsNullOrEmpty(basePath))
                 {
@@ -72,8 +62,10 @@ namespace AnalisisVentas.Application.Services
                     return ServiceResult.ErrorResult("Configuración de CsvBasePath no encontrada.");
                 }
 
+                //extracción de todas las fuentes
 
 
+                //Api
                 _logger.LogInformation("Extrayendo datos de APIs...");
                 var apiCustomers = await _apiClienteRepo.GetClientesActualizadosAsync();
                 _logger.LogInformation("[E] Extraídos {Count} clientes de API.", apiCustomers.Count());
@@ -82,7 +74,7 @@ namespace AnalisisVentas.Application.Services
                 _logger.LogInformation("[E] Extraídos {Count} productos de API.", apiProducts.Count());
 
 
-
+                //BD
 
                 _logger.LogInformation("Extrayendo datos de Base de Datos...");
                 var dbSales = await _dbVentaRepo.GetVentasHistoricas();
@@ -90,7 +82,7 @@ namespace AnalisisVentas.Application.Services
 
                 
                 
-
+                //csv
                 
                 _logger.LogInformation("Extrayendo datos de CSVs desde: {BasePath}", basePath);
 
@@ -111,7 +103,7 @@ namespace AnalisisVentas.Application.Services
                 _logger.LogInformation("===== FIN DE LA EXTRACCIÓN =====");
 
 
-                // (La Transformación (T) vendrá después)
+                // (La Transformación (T) vendra después)
 
                 return ServiceResult.SuccessResult("Extracción de todas las fuentes completada.");
             }

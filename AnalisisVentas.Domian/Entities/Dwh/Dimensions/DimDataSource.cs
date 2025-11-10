@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AnalisisVentas.Domain.Entities.Dwh
+﻿namespace AnalisisVentas.Domain.Entities.Dwh
 {
     public class DimDataSource
     {

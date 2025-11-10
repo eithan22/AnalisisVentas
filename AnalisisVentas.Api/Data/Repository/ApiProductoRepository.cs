@@ -16,7 +16,7 @@ namespace AnalisisVentas.Api.Data.Repository
 
         public async Task<IEnumerable<Product>> GetProductosAsync()
         {
-            // Usa EF Core para leer de la tabla 'Products'
+            
             return await _context.Products
                 .AsNoTracking()
                 .ToListAsync();

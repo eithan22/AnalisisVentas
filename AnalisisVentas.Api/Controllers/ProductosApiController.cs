@@ -14,7 +14,7 @@ namespace AnalisisVentas.Api.Controllers
             _productoRepo = productoRepo;
         }
 
-        // Endpoint: api/ProductosApi/GetProductos
+        
         [HttpGet("GetProductos")]
         public async Task<IActionResult> GetProductos()
         {

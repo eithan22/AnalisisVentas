@@ -2,9 +2,6 @@
 using CsvHelper;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using System.IO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AnalisisVentas.Persistencia.Repositories.Csv
 {
@@ -32,13 +29,13 @@ namespace AnalisisVentas.Persistencia.Repositories.Csv
                 using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
                 
-                // Usamos 'await foreach' para iterar el flujo asíncrono
+               
                 var records = new List<TClass>();
                 await foreach (var record in csv.GetRecordsAsync<TClass>())
                 {
                     records.Add(record);
                 }
-                // --- FIN DE LA CORRECCIÓN ---
+                
 
                 _logger.LogInformation("Lectura de {Count} registros completada desde {FilePath}", records.Count, filePath);
                 return records;

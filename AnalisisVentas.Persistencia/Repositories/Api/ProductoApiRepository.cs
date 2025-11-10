@@ -1,6 +1,6 @@
 ﻿
 using AnalisisVentas.Application.Repositories.IApiRepository;
-using AnalisisVentas.Domian.Entities.Api.AnalisisVentas.Domain.Entities.Api;
+using AnalisisVentas.Domain.Entities.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
@@ -24,7 +24,6 @@ namespace AnalisisVentas.Persistencia.Repositories.Api
             _endpoint = configuration["ApiSources:ProductosEndpoint"];
         }
 
-        // (El resto de tu código está PERFECTO)
         public async Task<IEnumerable<ProductActualizados>> GetProductActualizadosAsync()
         {
             _logger.LogInformation("Iniciando extracción de API para Productos desde {Endpoint}...", _endpoint);
@@ -45,7 +44,7 @@ namespace AnalisisVentas.Persistencia.Repositories.Api
                 }
                 else
                 {
-                    _logger.LogError("Falló la extracción de API Productos. Código: {StatusCode}", response.StatusCode);
+                    _logger.LogError("Fallo la extracción de API Productos. Codigo: {StatusCode}", response.StatusCode);
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,4 @@
-﻿// Archivo: AnalisisVentas.Api/Controllers/ClientesApiController.cs
-using AnalisisVentas.Api.Data.Interface; // ¡Importa tu interfaz!
+﻿using AnalisisVentas.Api.Data.Interface; 
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnalisisVentas.Api.Controllers
@@ -8,7 +7,7 @@ namespace AnalisisVentas.Api.Controllers
     [ApiController]
     public class ClientesApiController : ControllerBase
     {
-        // 1. Inyecta la INTERFAZ (el contrato)
+      
         private readonly IApiClienteRepository _clienteRepo;
 
         public ClientesApiController(IApiClienteRepository clienteRepo)
@@ -16,8 +15,7 @@ namespace AnalisisVentas.Api.Controllers
             _clienteRepo = clienteRepo;
         }
 
-        // 2. Crea el endpoint que tu Worker llamará
-        // Endpoint: api/ClientesApi/GetClientes
+      
         [HttpGet("GetClientes")]
         public async Task<IActionResult> GetClientes()
         {

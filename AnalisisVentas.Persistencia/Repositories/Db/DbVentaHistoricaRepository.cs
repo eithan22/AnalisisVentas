@@ -1,5 +1,5 @@
-﻿using AnalisisVentas.Application.Repositories.BD; 
-using AnalisisVentas.Domian.Entities.DB.AnalisisVentas.Domain.Entities.DB;
+﻿using AnalisisVentas.Application.Repositories.BD;
+using AnalisisVentas.Domain.Entities.DB;
 using AnalisisVentas.Persistencia.Repositories.Db.BDContext; 
 using Microsoft.EntityFrameworkCore; 
 

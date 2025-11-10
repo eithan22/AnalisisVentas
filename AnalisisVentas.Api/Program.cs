@@ -14,10 +14,7 @@ namespace AnalisisVentas.Api
 
             // Add services to the container.
 
-            // --- 1. REGISTRAR SERVICIOS (Igual que el profe) ---
-
-            // Registra el DbContext y le dice que use la
-            // cadena "DefaultConnection" de tu appsettings.json
+           
             builder.Services.AddDbContext<ApiContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -25,9 +22,7 @@ namespace AnalisisVentas.Api
             builder.Services.AddScoped<IApiClienteRepository, ApiClienteRepository>();
             builder.Services.AddScoped<IApiProductoRepository, ApiProductoRepository>();
 
-            // ----------------------------------------------------
-
-
+            
 
 
             builder.Services.AddControllers();

@@ -1,5 +1,4 @@
-﻿using System;
-namespace AnalisisVentas.Domian.Entities.Cvs
+﻿namespace AnalisisVentas.Domian.Entities.Cvs
 {
     public class Orders
     {
