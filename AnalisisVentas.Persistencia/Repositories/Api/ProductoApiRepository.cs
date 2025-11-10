@@ -8,15 +8,15 @@ using System.Net.Http.Json;
 
 namespace AnalisisVentas.Persistencia.Repositories.Api
 {
-    public class ApiProductoRepository : IProductApiRepositoriy
+    public class ProductoApiRepository : IProductApiRepositoriy
     {
         private readonly IHttpClientFactory _clientFactory;
-        private readonly ILogger<ApiProductoRepository> _logger;
+        private readonly ILogger<ProductoApiRepository> _logger;
         private readonly string _endpoint;
 
-        public ApiProductoRepository(
+        public ProductoApiRepository(
             IHttpClientFactory clientFactory,
-            ILogger<ApiProductoRepository> logger,
+            ILogger<ProductoApiRepository> logger,
             IConfiguration configuration)
         {
             _clientFactory = clientFactory;

@@ -4,6 +4,8 @@ using AnalisisVentas.Api.Data.Interface;
 using AnalisisVentas.Api.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
+
+
 namespace AnalisisVentas.Api
 {
     public class Program
@@ -12,13 +14,11 @@ namespace AnalisisVentas.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
            
             builder.Services.AddDbContext<ApiContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Registra los repositorios
+          
             builder.Services.AddScoped<IApiClienteRepository, ApiClienteRepository>();
             builder.Services.AddScoped<IApiProductoRepository, ApiProductoRepository>();
 

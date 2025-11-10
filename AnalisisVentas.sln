@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{0D5145F4-985
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalisisVentas.Api", "AnalisisVentas.Api\AnalisisVentas.Api.csproj", "{2347D0DB-29B2-439D-8E8E-20036697CD2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalisisVentas.web", "AnalisisVentas.web\AnalisisVentas.web.csproj", "{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{2347D0DB-29B2-439D-8E8E-20036697CD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2347D0DB-29B2-439D-8E8E-20036697CD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2347D0DB-29B2-439D-8E8E-20036697CD2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +63,7 @@ Global
 		{ADEE8BF7-A2AA-4272-985A-90BE5E4C0D86} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0D3683B9-EE40-47BD-BB82-196CC857CCDB} = {E0363EA8-510F-4DD9-A608-3C3A5AE2FA9B}
 		{2347D0DB-29B2-439D-8E8E-20036697CD2C} = {0D5145F4-9859-4D56-B398-9BAEC325D15C}
+		{F975E97B-DED0-4AA8-9A5A-E0C9889C7BC0} = {E0363EA8-510F-4DD9-A608-3C3A5AE2FA9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {385DBD90-6C54-488C-9C67-19856ECB4881}

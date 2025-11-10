@@ -21,7 +21,7 @@ namespace AnalisisVentas.Persistencia.Repositories.Db.BDContext
            
             modelBuilder.Entity<VentasHistorica>(entity =>
             {
-                // EF Core que lea de la VISTA
+                // EF Core que lea de la vista
 
                 entity.ToView("Vw_VentasHistoricas");
                 entity.HasKey(e => e.VentaID);
