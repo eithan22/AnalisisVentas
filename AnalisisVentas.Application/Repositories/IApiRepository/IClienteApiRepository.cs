@@ -11,7 +11,7 @@ namespace AnalisisVentas.Application.Repositories
     
    public interface IClienteApiRepository
     {
-        Task<IEnumerable<ClientesActualizados>> GetClientesActualizados();
+        Task<IEnumerable<ClientesActualizados>> GetClientesActualizadosAsync();
 
     }
 

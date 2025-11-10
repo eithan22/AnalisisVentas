@@ -11,10 +11,16 @@ namespace AnalisisVentas.Domian.Entities.Api
         // Esta clase es un "espejo" del JSON que recibes de la API
         public class ProductActualizados
         {
-            public int ProductoID { get; set; }
-            public string Nombre { get; set; }
+            //[Key]
+            public int IdProducto { get; set; }
+
+            public string NombreProducto { get; set; }
+
             public string Categoria { get; set; }
+
             public decimal Precio { get; set; }
+
+            public int Stock { get; set; }
         }
     }
 }

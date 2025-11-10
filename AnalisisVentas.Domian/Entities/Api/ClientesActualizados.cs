@@ -11,12 +11,20 @@ namespace AnalisisVentas.Domian.Entities.Api
         // Esta clase es un "espejo" del JSON que recibes de la API
         public class ClientesActualizados
         {
-            // Ajusta estas propiedades para que coincidan con los nombres en el JSON
-            // (puedes usar [JsonPropertyName("nombre_en_json")] si son muy diferentes)
-            public int ClienteID { get; set; }
-            public string Nombre { get; set; }
+            //[Key]
+            public int IdCliente { get; set; }
+
+            public string FirstName { get; set; }
+
+            public string LastName { get; set; }
+
             public string Email { get; set; }
-            public string Region { get; set; }
+
+            public string Phone { get; set; }
+
+            public string City { get; set; }
+
+            public string Country { get; set; }
         }
     }
 }

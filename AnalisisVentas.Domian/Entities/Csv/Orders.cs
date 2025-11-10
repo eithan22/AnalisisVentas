@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace AnalisisVentas.Domian.Entities.Cvs
 {
     public class Orders
@@ -12,6 +7,5 @@ namespace AnalisisVentas.Domian.Entities.Cvs
         public int CustomerID { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; }
-
     }
 }

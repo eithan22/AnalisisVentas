@@ -11,7 +11,7 @@ namespace AnalisisVentas.Application.Repositories.IApiRepository
 {
     public interface IProductApiRepositoriy
     {
-        Task<IEnumerable<ProductActualizados>> GetProductActualizados();
+        Task<IEnumerable<ProductActualizados>> GetProductActualizadosAsync();
 
 
     }

@@ -1,46 +1,61 @@
-﻿// 1. ESTOS SON LOS 'USINGS' CORRECTOS QUE NECESITAS
-using AnalisisVentas.Application.Interfaces; // Para IExtractor<T>
-using AnalisisVentas.Application.Repositories.IApiRepository; // Para IProductApiRepositoriy
+﻿
+using AnalisisVentas.Application.Repositories.IApiRepository;
 using AnalisisVentas.Domian.Entities.Api.AnalisisVentas.Domain.Entities.Api;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System; // Para Exception
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Net.Http.Json;
 
-// 2. ELIMINA EL 'USING' INCORRECTO
-// using AnalisisVentas.Domian.Entities.Api.AnalisisVentas.Domain.Entities.Api; 
 
 namespace AnalisisVentas.Persistencia.Repositories.Api
 {
-    // Implementa TU interfaz específica
     public class ApiProductoRepository : IProductApiRepositoriy
     {
-        private readonly IExtractor<ProductActualizados> _apiExtractor;
+        private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<ApiProductoRepository> _logger;
+        private readonly string _endpoint;
 
         public ApiProductoRepository(
-            IExtractor<ProductActualizados> apiExtractor,
-            ILogger<ApiProductoRepository> logger)
+            IHttpClientFactory clientFactory,
+            ILogger<ApiProductoRepository> logger,
+            IConfiguration configuration)
         {
-            _apiExtractor = apiExtractor;
+            _clientFactory = clientFactory;
             _logger = logger;
+            _endpoint = configuration["ApiSources:ProductosEndpoint"];
         }
 
-        // 3. Este nombre ('GetProductActualizados') DEBE COINCIDIR
-        //    exactamente con el de tu interfaz 'IProductApiRepositoriy'
-        public async Task<IEnumerable<ProductActualizados>> GetProductActualizados()
+        // (El resto de tu código está PERFECTO)
+        public async Task<IEnumerable<ProductActualizados>> GetProductActualizadosAsync()
         {
-            _logger.LogInformation("Repositorio ApiProducto: Delegando extracción a 'productos'...");
+            _logger.LogInformation("Iniciando extracción de API para Productos desde {Endpoint}...", _endpoint);
+            var productos = new List<ProductActualizados>();
+
             try
             {
-                // Asumimos que el endpoint es 'productos'. Cámbialo si es necesario.
-                return await _apiExtractor.ExtractAsync("productos");
+                using var client = _clientFactory.CreateClient("ApiClient");
+                var response = await client.GetAsync(_endpoint);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResponse = await response.Content.ReadFromJsonAsync<IEnumerable<ProductActualizados>>();
+                    if (apiResponse != null)
+                    {
+                        productos = apiResponse.ToList();
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Falló la extracción de API Productos. Código: {StatusCode}", response.StatusCode);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Repositorio ApiProducto: Error al extraer datos.");
-                throw;
+                _logger.LogError(ex, "Error extrayendo productos de la API en {Endpoint}", _endpoint);
+                return new List<ProductActualizados>();
             }
+
+            _logger.LogInformation("Se extrajeron {Count} productos de la API.", productos.Count);
+            return productos;
         }
     }
 }

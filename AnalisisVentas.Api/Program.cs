@@ -1,4 +1,9 @@
 
+using AnalisisVentas.Api.Data.Context;
+using AnalisisVentas.Api.Data.Interface;
+using AnalisisVentas.Api.Data.Repository;
+using Microsoft.EntityFrameworkCore;
+
 namespace AnalisisVentas.Api
 {
     public class Program
@@ -9,7 +14,18 @@ namespace AnalisisVentas.Api
 
             // Add services to the container.
 
-            
+            // --- 1. REGISTRAR SERVICIOS (Igual que el profe) ---
+
+            // Registra el DbContext y le dice que use la
+            // cadena "DefaultConnection" de tu appsettings.json
+            builder.Services.AddDbContext<ApiContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Registra los repositorios
+            builder.Services.AddScoped<IApiClienteRepository, ApiClienteRepository>();
+            builder.Services.AddScoped<IApiProductoRepository, ApiProductoRepository>();
+
+            // ----------------------------------------------------
 
 
 
