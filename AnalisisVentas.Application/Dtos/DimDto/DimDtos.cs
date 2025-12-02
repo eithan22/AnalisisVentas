@@ -1,0 +1,21 @@
+﻿using AnalisisVentas.Domian.Entities.Cvs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AnalisisVentas.Application.Dtos.DimDto
+{
+    public class DimDtos
+    {
+
+        
+        public IEnumerable<Customer> Customers { get; set; } = new List<Customer>();
+        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+
+        // Necesitamos las ordenes para generar las Dimensiones de FECHA y ESTADO
+        public IEnumerable<Orders> Orders { get; set; } = new List<Orders>();
+
+    }
+}

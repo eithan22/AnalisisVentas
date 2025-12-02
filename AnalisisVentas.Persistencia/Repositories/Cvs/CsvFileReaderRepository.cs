@@ -18,6 +18,7 @@ namespace AnalisisVentas.Persistencia.Repositories.Csv
         {
             _logger.LogInformation("Iniciando lectura de CSV: {FilePath}", filePath);
             try
+
             {
                 if (!File.Exists(filePath))
                 {

@@ -46,7 +46,7 @@ namespace AnalisisVentas.Persistencia.Repositories.Api
                 }
                 else
                 {
-                    _logger.LogError("Falló la extracción de API Clientes. Código: {StatusCode}", response.StatusCode);
+                    _logger.LogError("Fall0 la extraccion de API Clientes. Código: {StatusCode}", response.StatusCode);
                 }
             }
             catch (Exception ex)

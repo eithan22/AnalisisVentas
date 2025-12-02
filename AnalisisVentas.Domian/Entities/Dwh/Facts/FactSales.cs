@@ -3,6 +3,7 @@
     public class FactSales
     {
         public int SalesKey { get; set; }
+        public int SalesId { get; set; }
         public int? ProductKey { get; set; }
         public int? CustomerKey { get; set; }
         public int? DateKey { get; set; }

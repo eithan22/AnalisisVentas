@@ -3,8 +3,10 @@ using AnalisisVentas.Application.Repositories;
 using AnalisisVentas.Application.Repositories.BD;
 using AnalisisVentas.Application.Repositories.IApiRepository;
 using AnalisisVentas.Application.Result;
+using AnalisisVentas.Domain.Entities.Dwh.Dimensions;
 using AnalisisVentas.Domian.Entities.Cvs;
-using AnalisisVentas.Domian.Repository; 
+using AnalisisVentas.Domian.Repository;
+using AnalisisVentas.Persistencia.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +26,9 @@ namespace AnalisisVentas.Application.Services
         private readonly IFileReaderRepository<Customer> _csvClienteRepo;
         private readonly IFileReaderRepository<Product> _csvProductoRepo;
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
-        private readonly IFileReaderRepository<OrderDetail> _csvOrderDetailRepo; 
+        private readonly IFileReaderRepository<OrderDetail> _csvOrderDetailRepo;
+
+        private readonly IDataWhRepository _dataWhRepository; //NUEVO   
 
         public VentasServices(
             ILogger<VentasServices> logger,
@@ -35,7 +39,9 @@ namespace AnalisisVentas.Application.Services
             IFileReaderRepository<Customer> csvClienteRepo,
             IFileReaderRepository<Product> csvProductoRepo,
             IFileReaderRepository<Orders> csvOrderRepo,
-            IFileReaderRepository<OrderDetail> csvOrderDetailRepo)
+            IFileReaderRepository<OrderDetail> csvOrderDetailRepo,
+            IDataWhRepository dataWhRepository
+            )
         {
             _logger = logger;
             _configuration = configuration;
@@ -46,6 +52,7 @@ namespace AnalisisVentas.Application.Services
             _csvProductoRepo = csvProductoRepo;
             _csvOrderRepo = csvOrderRepo;
             _csvOrderDetailRepo = csvOrderDetailRepo;
+            _dataWhRepository = dataWhRepository;
         }
 
        
@@ -103,7 +110,10 @@ namespace AnalisisVentas.Application.Services
                 _logger.LogInformation("===== FIN DE LA EXTRACCIÓN =====");
 
 
+
+
                 // (La Transformación (T) vendra después)
+
 
                 return ServiceResult.SuccessResult("Extracción de todas las fuentes completada.");
             }
