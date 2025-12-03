@@ -12,5 +12,7 @@ namespace AnalisisVentas.Domain.Entities.Dwh.Dimensions;
         public int ProductID { get; set; }
         public string? ProductName { get; set; }
         public string Category { get; set; } = string.Empty;
-        public decimal Price { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Price { get; set; }
     }

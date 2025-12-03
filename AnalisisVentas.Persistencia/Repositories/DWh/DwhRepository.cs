@@ -1,7 +1,6 @@
 ﻿
 using AnalisisVentas.Application.Dtos.DimDto;
 using AnalisisVentas.Application.Result;
-using AnalisisVentas.Domain.Entities.Dwh;
 using AnalisisVentas.Domain.Entities.Dwh.Dimensions;
 using AnalisisVentas.Persistencia.Repositories.DWh.DWContext;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +13,6 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
         private readonly ILogger<DWHVentasContextcs> _logger;
         private readonly DWHVentasContextcs _context;
-
-
 
 
         public DwhRepository(DWHVentasContextcs dWHVentasContextcs,
@@ -31,41 +28,40 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
             ServiceResult result = new ServiceResult();
             try
             {
-                // 1. LIMPIEZA: Borrar datos antiguos (Fact primero, luego Dimensiones)
+                //  limpiar datos antiguos 
                 var cleanResult = await CleanDimensionTables();
                 if (!cleanResult.IsSuccess) return cleanResult;
 
 
 
-                // 2. CARGA DE CLIENTES (DimCustomer)
-                // Tomamos la lista del DTO, quitamos duplicados por Email y mapeamos a la Entidad
+                //  CARGA DE CLIENTES (DimCustomer)
                 var customers = dimDtos.Customers
                     .Select(c => new
                     {
-                        // Normalizamos datos antes de agrupar
                         Email = c.Email?.Trim() ?? "Sin Email",
                         Data = c
                     })
-                    .DistinctBy(c => c.Email) // Requiere .NET 6+. Si usas anterior, usa GroupBy
+              
+                    .DistinctBy(c => c.Email)
+                  
                     .Select(c => new DimCustomer
                     {
-                        // Asegúrate que CustomerId en el CSV sea un número válido, o usa TryParse
-                        CustomerID = (c.Data.CustomerID),
+                        CustomerID = c.Data.CustomerID,
                         FirstName = c.Data.FirstName,
+                        LastName = c.Data.LastName,  
+
                         Email = c.Email,
                         Phone = c.Data.Phone ?? "N/A",
                         City = c.Data.City ?? "N/A",
                         Country = c.Data.Country ?? "N/A"
-                        // CustomerKey es IDENTITY, SQL Server lo genera solo.
                     }).ToArray();
 
                 await _context.DimCustomers.AddRangeAsync(customers);
 
-                // Guardamos aquí para asegurar que los clientes ya existan si fuera necesario
-                // aunque para carga masiva simple podemos guardar al final.
 
 
-                // 3. CARGA DE PRODUCTOS (DimProduct)
+
+                //  CARGA DE PRODUCTOS (DimProduct)
                 var products = dimDtos.Products
                     .Select(p => new DimProduct
                     {
@@ -74,20 +70,21 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                         Category = p.Category ?? "Sin Categoría",
                         Price = p.Price
                     })
-                    .DistinctBy(p => p.ProductID) // Evitar duplicados por ID de producto original
+                    .DistinctBy(p => p.ProductID) 
                     .ToArray();
 
                 await _context.DimProducts.AddRangeAsync(products);
 
 
-                // 4. CARGA DE FECHAS (DimDate)
-                // Generamos el calendario basándonos en las fechas que vienen en las Órdenes
+
+
+                // CARGA DE FECHAS (DimDate)
                 var dates = dimDtos.Orders
                     .Select(o => o.OrderDate)
                     .Distinct()
                     .Select(fe => new DimDate
                     {
-                        // Lógica de llave inteligente: 20251127 (INT)
+                        
                         DateKey = (fe.Year * 10000) + (fe.Month * 100) + fe.Day,
                         IdDate = (fe.Year * 10000) + (fe.Month * 100) + fe.Day,
                         Day = fe.Day,
@@ -99,15 +96,17 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                 await _context.DimDates.AddRangeAsync(dates);
 
 
-                // 5. CARGA DE ESTADOS (DimStatus)
-                // Extraemos los estados únicos de las órdenes
+
+
+                //  CARGA DE ESTADOS (DimStatus)
+                
                 var statuses = dimDtos.Orders
                      .Select(o => o.Status)
                      .Where(s => !string.IsNullOrEmpty(s))
                      .Distinct()
                      .Select((status, index) => new DimStatus
                      {
-                         StatusID = index + 1, // ID artificial secuencial
+                         StatusID = index + 1, 
                          StatusName = status
                      }).ToArray();
 
@@ -116,12 +115,12 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
 
                
-                // 6. CARGA DE DATASOURCE (NUEVO)
+                //  CARGA DE DATASOURCE
               
-                // Creamos un registro que represente esta carga masiva de CSV
+      
                 var dataSource = new DimDataSource
                 {
-                    SourceId = 1, // Un ID interno arbitrario (1 = CSV, 2 = API, etc.)
+                    SourceId = 1,
                     SourceType = "CSV",
                     LoadDate = DateTime.Now // Fecha exacta de la carga
                 };
@@ -131,7 +130,8 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
 
 
-                // 7. GUARDADO FINAL
+
+                // GUARDADO FINAL
                 await _context.SaveChangesAsync();
 
                 result.IsSuccess = true;
@@ -152,13 +152,12 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
         {
             try
             {
-                // Orden Crítico: Primero FactSales (Hija), luego Dimensiones (Padres)
-                // Si borras Dimensiones primero, SQL dará error de Foreign Key
+                // Primero FactSales  luego Dimensiones 
+               
                 if (_context.factSales.Any())
                 {
                     await _context.factSales.ExecuteDeleteAsync();
                 }
-
 
                 await _context.DimProducts.ExecuteDeleteAsync();
                 await _context.DimCustomers.ExecuteDeleteAsync();
@@ -166,7 +165,7 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                 await _context.DimStatuses.ExecuteDeleteAsync();
                 await _context.DimDataSources.ExecuteDeleteAsync();
 
-                // Guardamos el estado limpio
+               
                 await _context.SaveChangesAsync();
 
                 return ServiceResult.SuccessResult("Tablas limpiadas correctamente.");

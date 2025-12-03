@@ -14,9 +14,7 @@ namespace AnalisisVentas.wksLoadDwh
         public static void Main(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
-            builder.Services.AddHostedService<Worker>();
-
-
+        
             //registart las dependencias 
 
             builder.Services.AddDbContext<DWHVentasContextcs>(options =>
@@ -30,10 +28,10 @@ namespace AnalisisVentas.wksLoadDwh
             builder.Services.AddScoped<IDwhRepository, DwhRepository>();
 
 
-            // 3. SERVICIOS
-            builder.Services.AddScoped<IVentasServices, VentasServices>();// usa addtransient 
+            // servicio 
+            builder.Services.AddScoped<IVentasServices, VentasServices>();
 
-
+              builder.Services.AddHostedService<Worker>();
 
             var host = builder.Build();
             host.Run();

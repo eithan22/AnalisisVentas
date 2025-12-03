@@ -15,8 +15,4 @@
     <ProjectReference Include="..\AnalisisVentas.Domian\AnalisisVentas.Domian.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dtos\ApiDtos\" />
-  </ItemGroup>
-
 </Project>

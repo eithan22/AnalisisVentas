@@ -9,12 +9,11 @@ namespace AnalisisVentas.Application.Dtos.DimDto
 {
     public class DimDtos
     {
-
         
         public IEnumerable<Customer> Customers { get; set; } = new List<Customer>();
         public IEnumerable<Product> Products { get; set; } = new List<Product>();
 
-        // Necesitamos las ordenes para generar las Dimensiones de FECHA y ESTADO
+        //  generar las Dimensiones de fecha y estado con ordenes
         public IEnumerable<Orders> Orders { get; set; } = new List<Orders>();
 
     }

@@ -1,4 +1,5 @@
-﻿using AnalisisVentas.Application.Interfaces;
+﻿using AnalisisVentas.Application.Dtos.DimDto;
+using AnalisisVentas.Application.Interfaces;
 using AnalisisVentas.Application.Repositories;
 using AnalisisVentas.Application.Repositories.BD;
 using AnalisisVentas.Application.Repositories.IApiRepository;
@@ -19,10 +20,10 @@ namespace AnalisisVentas.Application.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<VentasServices> _logger;
 
-        private readonly IClienteApiRepository _apiClienteRepo;
-        private readonly IProductApiRepositoriy _apiProductoRepo;
+        //private readonly IClienteApiRepository _apiClienteRepo;
+        //private readonly IProductApiRepositoriy _apiProductoRepo;
       
-        private readonly IVentasHistoricaRepository _dbVentaRepo;
+        //private readonly IVentasHistoricaRepository _dbVentaRepo;
         private readonly IFileReaderRepository<Customer> _csvClienteRepo;
         private readonly IFileReaderRepository<Product> _csvProductoRepo;
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
@@ -33,9 +34,9 @@ namespace AnalisisVentas.Application.Services
         public VentasServices(
             ILogger<VentasServices> logger,
             IConfiguration configuration,
-            IClienteApiRepository apiClienteRepo,
-            IProductApiRepositoriy apiProductoRepo,
-            IVentasHistoricaRepository dbVentaRepo,
+           // IClienteApiRepository apiClienteRepo,
+          //  IProductApiRepositoriy apiProductoRepo,
+           // IVentasHistoricaRepository dbVentaRepo,
             IFileReaderRepository<Customer> csvClienteRepo,
             IFileReaderRepository<Product> csvProductoRepo,
             IFileReaderRepository<Orders> csvOrderRepo,
@@ -45,9 +46,9 @@ namespace AnalisisVentas.Application.Services
         {
             _logger = logger;
             _configuration = configuration;
-            _apiClienteRepo = apiClienteRepo;
-            _apiProductoRepo = apiProductoRepo;
-            _dbVentaRepo = dbVentaRepo;
+            //_apiClienteRepo = apiClienteRepo;
+            //_apiProductoRepo = apiProductoRepo;
+           // _dbVentaRepo = dbVentaRepo;
             _csvClienteRepo = csvClienteRepo;
             _csvProductoRepo = csvProductoRepo;
             _csvOrderRepo = csvOrderRepo;
@@ -73,6 +74,7 @@ namespace AnalisisVentas.Application.Services
 
                 //extracción de todas las fuentes
 
+                /*
 
                 //Api
                 _logger.LogInformation("Extrayendo datos de APIs...");
@@ -89,7 +91,7 @@ namespace AnalisisVentas.Application.Services
                 var dbSales = await _dbVentaRepo.GetVentasHistoricas();
                 _logger.LogInformation("[E] Extraídas {Count} ventas históricas de BD.", dbSales.Count());
 
-                
+                 */
                 
                 //csv
                 
@@ -115,9 +117,23 @@ namespace AnalisisVentas.Application.Services
 
 
                 // (La Transformación (T) vendra después)
+              
+                var datosParaCargar = new DimDtos
+                {
+                    Customers = csvCustomers,
+                    Products = csvProducts,
+                    Orders = csvOrders
+                };
+
+                //  Llamamos al repositorio para guardar
+                _logger.LogInformation("Enviando datos al Data Warehouse...");
+                var resultado = await _dwhRepository.LoandDimesDataAsync(datosParaCargar);
+
+               
+                return resultado;
 
 
-                return ServiceResult.SuccessResult("Extracción de todas las fuentes completada.");
+               // return ServiceResult.SuccessResult("Extracción de todas las fuentes completada.");
             }
             catch (Exception ex)
             {
