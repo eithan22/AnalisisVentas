@@ -7,7 +7,7 @@ namespace AnalisisVentas.Persistencia.Repositories
      
 
 {
-   public interface  IDataWhRepository
+   public interface  IDwhRepository
     {
         Task<ServiceResult> LoandDimesDataAsync(DimDtos dimDtos);
 

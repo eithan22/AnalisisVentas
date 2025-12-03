@@ -28,7 +28,7 @@ namespace AnalisisVentas.Application.Services
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
         private readonly IFileReaderRepository<OrderDetail> _csvOrderDetailRepo;
 
-        private readonly IDataWhRepository _dataWhRepository; //NUEVO   
+        private readonly IDwhRepository _dwhRepository; //NUEVO   
 
         public VentasServices(
             ILogger<VentasServices> logger,
@@ -40,7 +40,7 @@ namespace AnalisisVentas.Application.Services
             IFileReaderRepository<Product> csvProductoRepo,
             IFileReaderRepository<Orders> csvOrderRepo,
             IFileReaderRepository<OrderDetail> csvOrderDetailRepo,
-            IDataWhRepository dataWhRepository
+            IDwhRepository dwhRepository
             )
         {
             _logger = logger;
@@ -52,7 +52,9 @@ namespace AnalisisVentas.Application.Services
             _csvProductoRepo = csvProductoRepo;
             _csvOrderRepo = csvOrderRepo;
             _csvOrderDetailRepo = csvOrderDetailRepo;
-            _dataWhRepository = dataWhRepository;
+            _dwhRepository = dwhRepository;
+            //NUEVO
+
         }
 
        

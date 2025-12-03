@@ -10,4 +10,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnalisisVentas.Application\AnalisisVentas.Application.csproj" />
+    <ProjectReference Include="..\AnalisisVentas.Domian\AnalisisVentas.Domian.csproj" />
+    <ProjectReference Include="..\AnalisisVentas.Persistencia\AnalisisVentas.Persistencia.csproj" />
+  </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnalisisVentas.Persistencia.Repositories.DWh
 {
-    public class DwhRepository : IDataWhRepository
+    public class DwhRepository : IDwhRepository
     {
 
         private readonly ILogger<DWHVentasContextcs> _logger;
