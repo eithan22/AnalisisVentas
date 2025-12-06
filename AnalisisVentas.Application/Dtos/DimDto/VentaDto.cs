@@ -9,7 +9,6 @@ namespace AnalisisVentas.Application.Dtos.DimDto
     public class VentaDto
     {
         
-        
         public string OrderID { get; set; }
         public string CustomerID { get; set; }
         public string ProductID { get; set; }

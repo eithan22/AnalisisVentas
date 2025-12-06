@@ -1,14 +1,11 @@
-﻿
-
-
-using AnalisisVentas.Application.Dtos.DimDto;
+﻿using AnalisisVentas.Application.Dtos.DimDto;
 using AnalisisVentas.Application.Result;
 using AnalisisVentas.Domain.Entities.Dwh.Dimensions;
 using AnalisisVentas.Persistencia.Repositories.DWh.DWContext;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+
 
 namespace AnalisisVentas.Persistencia.Repositories.DWh
 {
@@ -27,7 +24,8 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
         }
 
 
-        // 1. CARGA DE DIMENSIONES
+        //  CARGA DE DIMENSIONES
+
         public async Task<ServiceResult> LoandDimesDataAsync(DimDtos dimDtos)
         {
             ServiceResult result = new ServiceResult();
@@ -148,44 +146,73 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
                 await _context.DimDataSources.AddAsync(dataSource);
 
-                /*
-
-                //caega de hechos FactSales
-
-                // NUEVO: Carga de Hechos (Ventas)
-                Task<ServiceResult> LoadFactSalesAsync(DimDtos dimDtos);
 
 
-                var factSales = dimDtos.Orders
-                 .Select(o => new FactSales
-                 {
-                    OrderID = o.OrderID,
-                    CustomerKey = customers.FirstOrDefault(c => c.CustomerID == o.CustomerID)?.CustomerKey ?? 0,
-                    ProductKey = products.FirstOrDefault(p => p.ProductID == o.ProductID)?.ProductKey ?? 0,
-                    DateKey = (o.OrderDate.Year * 10000) + (o.OrderDate.Month * 100) + o.OrderDate.Day,
-                    StatusKey = statuses.FirstOrDefault(s => s.StatusName == o.Status)?.StatusID ?? 0,
-                    DataSourceKey = dataSource.SourceId,
-                    Quantity = o.Quantity,
-                    TotalAmount = o.TotalAmount
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Dimensiones guardadas correctamente.");
 
-                 }).ToArray();
+
+
+
+                // Carga de  FactSales
+
+                var customerMap = customers.ToDictionary(c => c.CustomerID, c => c.CustomerKey);
+                var productMap = products.ToDictionary(p => p.ProductID, p => p.ProductKey);
+                var statusMap = statuses.ToDictionary(s => s.StatusName, s => s.StatusKey);
+
+                var factSalesList = new List<FactSales>();
+
+                //  Llenar lista usando VentasUnificadas 
+                foreach (var venta in dimDtos.VentasUnificadas)
+                {
+                    // Validamos que los IDs del CSV sean números válidos
+                    if (int.TryParse(venta.CustomerID, out int cid) &&
+                        int.TryParse(venta.ProductID, out int pid))
+                    {
+                        
+
+                        bool existeCliente = customerMap.TryGetValue(cid, out int customerKey);
+                        bool existeProducto = productMap.TryGetValue(pid, out int productKey);
+                        bool existeStatus = statusMap.TryGetValue(venta.Status, out int statusKey);
+
+                        if (existeCliente && existeProducto && existeStatus)
+                        {
+                            int dateKey = (venta.OrderDate.Year * 10000) + (venta.OrderDate.Month * 100) + venta.OrderDate.Day;
+
+                            factSalesList.Add(new FactSales
+                            {
+                                CustomerKey = customerKey,
+                                ProductKey = productKey,
+                                DateKey = dateKey,
+                                StatusKey = statusKey,
+                                DataSourceKey = dataSource.DataSourceKey,
+                                Quantity = venta.Quantity,
+                                UnitPrice = venta.UnitPrice,
+                                TotalPrice = venta.TotalAmount
+                            });
+                        }
+                        
+                    }
+                }
+
+
+
+                if (factSalesList.Any())
+                {
+                    await _context.factSales.AddRangeAsync(factSalesList);
+                    _logger.LogInformation("tabla fact ventas guardada correctamente.");
+                }
 
                 
-
-                */
-
-
-
-
-                // GUARDADO FINAL
                 await _context.SaveChangesAsync();
 
                 result.IsSuccess = true;
-                result.Message = $"Carga completada: {customers.Length} Clientes, {products.Length} Productos.";
+
+                result.Message = $"Carga completada: {customers.Length} Clientes, {products.Length} Productos, {factSalesList.Count} Ventas.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error crítico cargando dimensiones");
+                _logger.LogError(ex, "Error crítico cargando ");
                 result.IsSuccess = false;
                 result.Message = $"Error: {ex.Message}";
             }
@@ -200,32 +227,25 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
         {
             try
             {
-                // Primero FactSales  luego Dimensiones 
-
-                if (_context.factSales.Any())
-                {
-                    await _context.factSales.ExecuteDeleteAsync();
-                }
-
+              
+                await _context.factSales.ExecuteDeleteAsync();
+                await _context.DimDataSources.ExecuteDeleteAsync();
+                await _context.DimStatuses.ExecuteDeleteAsync();
+                await _context.DimDates.ExecuteDeleteAsync();
                 await _context.DimProducts.ExecuteDeleteAsync();
                 await _context.DimCustomers.ExecuteDeleteAsync();
-                await _context.DimDates.ExecuteDeleteAsync();
-                await _context.DimStatuses.ExecuteDeleteAsync();
-                await _context.DimDataSources.ExecuteDeleteAsync();
-                await _context.factSales.ExecuteDeleteAsync(); // nueva
 
-
-                await _context.SaveChangesAsync();
-
+               
                 return ServiceResult.SuccessResult("Tablas limpiadas correctamente.");
             }
             catch (Exception ex)
             {
-                return ServiceResult.ErrorResult($"Error limpiando tablas: {ex.Message}");
+                _logger.LogError(ex, "Error limpiando tablas");
+                return ServiceResult.ErrorResult($"Error limpieza: {ex.Message}");
             }
         }
-
-
     }
 }
 
+
+       

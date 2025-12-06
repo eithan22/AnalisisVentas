@@ -29,7 +29,7 @@ namespace AnalisisVentas.Application.Services
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
         private readonly IFileReaderRepository<OrderDetail> _csvOrderDetailRepo;
 
-        private readonly IDwhRepository _dwhRepository; //NUEVO   
+        private readonly IDwhRepository _dwhRepository; 
 
         public VentasServices(
             ILogger<VentasServices> logger,
@@ -115,14 +115,20 @@ namespace AnalisisVentas.Application.Services
 
 
 
+                _logger.LogInformation("===== INICIANDO TRANSFORMACIÓN DE VENTAS =====");
+                var ventasUnificadas = CombinarOrdersConDetalles(csvOrders, csvDetails);
+                _logger.LogInformation("[T] Transformadas {Count} ventas combinadas (Orders + OrderDetails).", ventasUnificadas.Count());
 
-                // (La Transformación (T) vendra después)
-              
+
+
+                // La Transformacion 
+
                 var datosParaCargar = new DimDtos
                 {
                     Customers = csvCustomers,
                     Products = csvProducts,
-                    Orders = csvOrders
+                    Orders = csvOrders,
+                     VentasUnificadas = ventasUnificadas
                 };
 
                 //  Llamamos al repositorio para guardar
@@ -133,13 +139,68 @@ namespace AnalisisVentas.Application.Services
                 return resultado;
 
 
-               // return ServiceResult.SuccessResult("Extracción de todas las fuentes completada.");
+               
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Fallo  en la fase de extracción.");
                 return ServiceResult.ErrorResult("Fallo de Extracción: " + ex.Message);
             }
+        }
+
+
+        private List<VentaDto> CombinarOrdersConDetalles(
+           IEnumerable<Orders> orders,
+           IEnumerable<OrderDetail> orderDetails)
+        {
+            var ventasUnificadas = new List<VentaDto>();
+
+            // Convertir orderDetails a diccionario para busqueda muas rapida
+            var detallesPorOrder = orderDetails
+                .GroupBy(d => d.OrderID)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var order in orders)
+            {
+                
+                if (detallesPorOrder.TryGetValue(order.OrderID, out var detalles))
+                {
+                    foreach (var detalle in detalles)
+                    {
+                        //calcular unitprice
+                        decimal unitPrice = 0;
+
+                        if (detalle.Quantity > 0)
+                        {
+                            unitPrice = detalle.TotalPrice / detalle.Quantity;
+                        }
+                        else
+                        {
+                            _logger.LogWarning(
+                                "OrderID {OrderID}, ProductID {ProductID} tiene Quantity = 0. UnitPrice = 0.",
+                                order.OrderID, detalle.ProductID);
+                        }
+
+                        ventasUnificadas.Add(new VentaDto
+                        {
+                            OrderID = order.OrderID.ToString(),
+                            CustomerID = order.CustomerID.ToString(),
+                            ProductID = detalle.ProductID.ToString(),
+                            OrderDate = order.OrderDate,
+                            Status = order.Status ?? "Unknown",
+                            Quantity = detalle.Quantity,
+                            UnitPrice = unitPrice,
+                            TotalAmount = detalle.TotalPrice
+                        });
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Order {OrderID} no tiene detalles asociados.", order.OrderID);
+                }
+            }
+
+            return ventasUnificadas;
         }
     }
 }
