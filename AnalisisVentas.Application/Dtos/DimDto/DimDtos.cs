@@ -16,5 +16,9 @@ namespace AnalisisVentas.Application.Dtos.DimDto
         //  generar las Dimensiones de fecha y estado con ordenes
         public IEnumerable<Orders> Orders { get; set; } = new List<Orders>();
 
+        //utilizdo para cargar la tabla de hechos
+        public IEnumerable<VentaDto> VentasUnificadas { get; set; } = new List<VentaDto>();
     }
+
 }
+

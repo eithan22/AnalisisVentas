@@ -1,10 +1,14 @@
 ﻿
+
+
 using AnalisisVentas.Application.Dtos.DimDto;
 using AnalisisVentas.Application.Result;
 using AnalisisVentas.Domain.Entities.Dwh.Dimensions;
 using AnalisisVentas.Persistencia.Repositories.DWh.DWContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace AnalisisVentas.Persistencia.Repositories.DWh
 {
@@ -23,14 +27,21 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
         }
 
 
+        // 1. CARGA DE DIMENSIONES
         public async Task<ServiceResult> LoandDimesDataAsync(DimDtos dimDtos)
         {
             ServiceResult result = new ServiceResult();
             try
             {
                 //  limpiar datos antiguos 
-                var cleanResult = await CleanDimensionTables();
-                if (!cleanResult.IsSuccess) return cleanResult;
+                result = await CleanTables();
+
+                if (!result.IsSuccess)
+                {
+                    this._logger.LogError(result.Message);
+
+                    return result;
+                }
 
 
 
@@ -41,14 +52,14 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                         Email = c.Email?.Trim() ?? "Sin Email",
                         Data = c
                     })
-              
+
                     .DistinctBy(c => c.Email)
-                  
+
                     .Select(c => new DimCustomer
                     {
                         CustomerID = c.Data.CustomerID,
                         FirstName = c.Data.FirstName,
-                        LastName = c.Data.LastName,  
+                        LastName = c.Data.LastName,
 
                         Email = c.Email,
                         Phone = c.Data.Phone ?? "N/A",
@@ -70,7 +81,7 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                         Category = p.Category ?? "Sin Categoría",
                         Price = p.Price
                     })
-                    .DistinctBy(p => p.ProductID) 
+                    .DistinctBy(p => p.ProductID)
                     .ToArray();
 
                 await _context.DimProducts.AddRangeAsync(products);
@@ -78,19 +89,28 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
 
 
-                // CARGA DE FECHAS (DimDate)
+
+                //  CARGA DE FECHAS (DimDate)
+
+                var cultura = new CultureInfo("es-ES");
+
                 var dates = dimDtos.Orders
                     .Select(o => o.OrderDate)
                     .Distinct()
                     .Select(fe => new DimDate
                     {
-                        
+
                         DateKey = (fe.Year * 10000) + (fe.Month * 100) + fe.Day,
-                        IdDate = (fe.Year * 10000) + (fe.Month * 100) + fe.Day,
+                        FullDate = fe.Date,
+
                         Day = fe.Day,
                         Month = fe.Month,
                         Year = fe.Year,
-                        Quarter = (fe.Month - 1) / 3 + 1
+                        Quarter = (fe.Month - 1) / 3 + 1,
+
+
+                        DayName = cultura.TextInfo.ToTitleCase(fe.ToString("dddd", cultura)),
+                        MonthName = cultura.TextInfo.ToTitleCase(fe.ToString("MMMM", cultura))
                     }).ToArray();
 
                 await _context.DimDates.AddRangeAsync(dates);
@@ -98,15 +118,16 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
 
 
+
                 //  CARGA DE ESTADOS (DimStatus)
-                
+
                 var statuses = dimDtos.Orders
                      .Select(o => o.Status)
                      .Where(s => !string.IsNullOrEmpty(s))
                      .Distinct()
                      .Select((status, index) => new DimStatus
                      {
-                         StatusID = index + 1, 
+                         StatusID = index + 1,
                          StatusName = status
                      }).ToArray();
 
@@ -114,10 +135,10 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
 
 
-               
+
                 //  CARGA DE DATASOURCE
-              
-      
+
+
                 var dataSource = new DimDataSource
                 {
                     SourceId = 1,
@@ -127,6 +148,31 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
                 await _context.DimDataSources.AddAsync(dataSource);
 
+                /*
+
+                //caega de hechos FactSales
+
+                // NUEVO: Carga de Hechos (Ventas)
+                Task<ServiceResult> LoadFactSalesAsync(DimDtos dimDtos);
+
+
+                var factSales = dimDtos.Orders
+                 .Select(o => new FactSales
+                 {
+                    OrderID = o.OrderID,
+                    CustomerKey = customers.FirstOrDefault(c => c.CustomerID == o.CustomerID)?.CustomerKey ?? 0,
+                    ProductKey = products.FirstOrDefault(p => p.ProductID == o.ProductID)?.ProductKey ?? 0,
+                    DateKey = (o.OrderDate.Year * 10000) + (o.OrderDate.Month * 100) + o.OrderDate.Day,
+                    StatusKey = statuses.FirstOrDefault(s => s.StatusName == o.Status)?.StatusID ?? 0,
+                    DataSourceKey = dataSource.SourceId,
+                    Quantity = o.Quantity,
+                    TotalAmount = o.TotalAmount
+
+                 }).ToArray();
+
+                
+
+                */
 
 
 
@@ -144,16 +190,18 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                 result.Message = $"Error: {ex.Message}";
             }
 
-            return result; 
+            return result;
         }
 
 
-        private async Task<ServiceResult> CleanDimensionTables()
+
+
+        private async Task<ServiceResult> CleanTables()
         {
             try
             {
                 // Primero FactSales  luego Dimensiones 
-               
+
                 if (_context.factSales.Any())
                 {
                     await _context.factSales.ExecuteDeleteAsync();
@@ -164,8 +212,9 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
                 await _context.DimDates.ExecuteDeleteAsync();
                 await _context.DimStatuses.ExecuteDeleteAsync();
                 await _context.DimDataSources.ExecuteDeleteAsync();
+                await _context.factSales.ExecuteDeleteAsync(); // nueva
 
-               
+
                 await _context.SaveChangesAsync();
 
                 return ServiceResult.SuccessResult("Tablas limpiadas correctamente.");
@@ -179,5 +228,4 @@ namespace AnalisisVentas.Persistencia.Repositories.DWh
 
     }
 }
-    
 
