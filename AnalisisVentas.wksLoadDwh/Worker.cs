@@ -48,7 +48,9 @@ namespace AnalisisVentas.wksLoadDwh
                     }
                 }
 
-                await Task.Delay(5000, stoppingToken);
+                _logger.LogInformation("Esperando 12 horas para la siguiente ejecución...");
+
+                await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
             }
         }
     }

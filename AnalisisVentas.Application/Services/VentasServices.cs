@@ -20,10 +20,10 @@ namespace AnalisisVentas.Application.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<VentasServices> _logger;
 
-        //private readonly IClienteApiRepository _apiClienteRepo;
-        //private readonly IProductApiRepositoriy _apiProductoRepo;
+        private readonly IClienteApiRepository _apiClienteRepo;
+        private readonly IProductApiRepositoriy _apiProductoRepo;
       
-        //private readonly IVentasHistoricaRepository _dbVentaRepo;
+        private readonly IVentasHistoricaRepository _dbVentaRepo;
         private readonly IFileReaderRepository<Customer> _csvClienteRepo;
         private readonly IFileReaderRepository<Product> _csvProductoRepo;
         private readonly IFileReaderRepository<Orders> _csvOrderRepo;
@@ -34,9 +34,9 @@ namespace AnalisisVentas.Application.Services
         public VentasServices(
             ILogger<VentasServices> logger,
             IConfiguration configuration,
-           // IClienteApiRepository apiClienteRepo,
-          //  IProductApiRepositoriy apiProductoRepo,
-           // IVentasHistoricaRepository dbVentaRepo,
+            IClienteApiRepository apiClienteRepo,
+            IProductApiRepositoriy apiProductoRepo,
+            IVentasHistoricaRepository dbVentaRepo,
             IFileReaderRepository<Customer> csvClienteRepo,
             IFileReaderRepository<Product> csvProductoRepo,
             IFileReaderRepository<Orders> csvOrderRepo,
@@ -46,25 +46,24 @@ namespace AnalisisVentas.Application.Services
         {
             _logger = logger;
             _configuration = configuration;
-            //_apiClienteRepo = apiClienteRepo;
-            //_apiProductoRepo = apiProductoRepo;
-           // _dbVentaRepo = dbVentaRepo;
+            _apiClienteRepo = apiClienteRepo;
+            _apiProductoRepo = apiProductoRepo;
+            _dbVentaRepo = dbVentaRepo;
             _csvClienteRepo = csvClienteRepo;
             _csvProductoRepo = csvProductoRepo;
             _csvOrderRepo = csvOrderRepo;
             _csvOrderDetailRepo = csvOrderDetailRepo;
             _dwhRepository = dwhRepository;
-            //NUEVO
+            
 
         }
 
        
         public async Task<ServiceResult> ProcesarExtraccionAsync() 
         {
-            _logger.LogInformation("===== INICIANDO FASE DE EXTRACCIÓN (TODAS LAS FUENTES) =====");
+            _logger.LogInformation("INICIANDO PROCESO ETL");
             try
             {
-              
                 string basePath = _configuration["CsvSources:BasePath"];
                 if (string.IsNullOrEmpty(basePath))
                 {
@@ -72,79 +71,76 @@ namespace AnalisisVentas.Application.Services
                     return ServiceResult.ErrorResult("Configuración de CsvBasePath no encontrada.");
                 }
 
-                //extracción de todas las fuentes
+                //  EXTRACCIÓN
+                _logger.LogInformation(" EXTRACCION DE DATOS");
 
-                /*
 
-                //Api
-                _logger.LogInformation("Extrayendo datos de APIs...");
+                // API
+                _logger.LogInformation("Extrayendo de API REST...");
                 var apiCustomers = await _apiClienteRepo.GetClientesActualizadosAsync();
-                _logger.LogInformation("[E] Extraídos {Count} clientes de API.", apiCustomers.Count());
-
                 var apiProducts = await _apiProductoRepo.GetProductActualizadosAsync();
-                _logger.LogInformation("[E] Extraídos {Count} productos de API.", apiProducts.Count());
 
 
-                //BD
-
-                _logger.LogInformation("Extrayendo datos de Base de Datos...");
+                // Base de Datos
+                _logger.LogInformation("Extrayendo de Base de Datos...");
                 var dbSales = await _dbVentaRepo.GetVentasHistoricas();
-                _logger.LogInformation("[E] Extraídas {Count} ventas históricas de BD.", dbSales.Count());
 
-                 */
-                
-                //csv
-                
-                _logger.LogInformation("Extrayendo datos de CSVs desde: {BasePath}", basePath);
 
+                // CSV
+                _logger.LogInformation("Extrayendo de archivos CSV: {BasePath}", basePath);
                 var csvCustomers = await _csvClienteRepo.ReadFileAsync(Path.Combine(basePath, "customers.csv"));
-                _logger.LogInformation("[E] Extraídos {Count} clientes de CSV.", csvCustomers.Count());
-
                 var csvProducts = await _csvProductoRepo.ReadFileAsync(Path.Combine(basePath, "products.csv"));
-                _logger.LogInformation("[E] Extraídos {Count} productos de CSV.", csvProducts.Count());
-
-
-            
                 var csvOrders = await _csvOrderRepo.ReadFileAsync(Path.Combine(basePath, "orders.csv"));
-                _logger.LogInformation("[E] Extraídas {Count} órdenes de CSV.", csvOrders.Count());
-
                 var csvDetails = await _csvOrderDetailRepo.ReadFileAsync(Path.Combine(basePath, "order_details.csv"));
-                _logger.LogInformation("[E] Extraídos {Count} detalles de CSV.", csvDetails.Count());
 
-                _logger.LogInformation("===== FIN DE LA EXTRACCIÓN =====");
+                
+            
+                _logger.LogInformation("RESUMEN EXTRACCION:");
+
+                _logger.LogInformation("  API: {ApiC} clientes, {ApiP} productos",
+                    apiCustomers.Count(), apiProducts.Count());
+
+                _logger.LogInformation("  Base de Datos: {BD} ventas historicas",
+                    dbSales.Count());
+
+                _logger.LogInformation("  CSV: {CsvC} clientes, {CsvP} productos, {CsvO} ordenes, {CsvD} detalles",
+                    csvCustomers.Count(), csvProducts.Count(), csvOrders.Count(), csvDetails.Count());
 
 
 
-                _logger.LogInformation("===== INICIANDO TRANSFORMACIÓN DE VENTAS =====");
+                //  TRANSFORMACIÓN
+                _logger.LogInformation(" TRANSFORMACION");
+
                 var ventasUnificadas = CombinarOrdersConDetalles(csvOrders, csvDetails);
-                _logger.LogInformation("[T] Transformadas {Count} ventas combinadas (Orders + OrderDetails).", ventasUnificadas.Count());
+                
 
-
-
-                // La Transformacion 
-
+                //  CARGA
+                _logger.LogInformation(" CARGA AL DATA WAREHOUSE");
                 var datosParaCargar = new DimDtos
                 {
                     Customers = csvCustomers,
                     Products = csvProducts,
                     Orders = csvOrders,
-                     VentasUnificadas = ventasUnificadas
+                    VentasUnificadas = ventasUnificadas
                 };
 
-                //  Llamamos al repositorio para guardar
-                _logger.LogInformation("Enviando datos al Data Warehouse...");
                 var resultado = await _dwhRepository.LoandDimesDataAsync(datosParaCargar);
 
-               
+                if (resultado.IsSuccess)
+                {
+                    _logger.LogInformation("PROCESO ETL COMPLETADO: {Message}", resultado.Message);
+                }
+                else
+                {
+                    _logger.LogError("ERROR EN CARGA: {Message}", resultado.Message);
+                }
+
                 return resultado;
-
-
-               
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fallo  en la fase de extracción.");
-                return ServiceResult.ErrorResult("Fallo de Extracción: " + ex.Message);
+                _logger.LogError(ex, "Error critico en proceso ETL");
+                return ServiceResult.ErrorResult($"Error ETL: {ex.Message}");
             }
         }
 
